@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>العمليات الأساسية في مجموعة الأعداد الحقيقية | إعداد: عائض الحربي</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Cairo, Tajawal & Fira Code -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Tajawal:wght@400;500;700;800&family=Fira+Code:wght@500;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        }
+                    },
+                    fontFamily: {
+                        cairo: ['Cairo', 'sans-serif'],
+                        tajawal: ['Tajawal', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #f0f7ff 0%, #e0f2fe 100%);
+            min-height: 100vh;
+        }
+
+        /* Mathematical Notation LTR Wrapper */
+        .ltr-math {
+            direction: ltr !important;
+            unicode-bidi: embed;
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* Number Line Visualizer Styling */
+        .number-line-container {
+            position: relative;
+            height: 60px;
+            margin: 20px 0;
+        }
+
+        .highlight-term {
+            background-color: #dbeafe !important;
+            border-color: #2563eb !important;
+            color: #1e40af !important;
+            transform: scale(1.05);
+            font-weight: bold;
+        }
+
+        .highlight-result {
+            background-color: #e0f2fe !important;
+            border-color: #0284c7 !important;
+            color: #0369a1 !important;
+            font-weight: bold;
+            box-shadow: 0 0 12px rgba(2, 132, 199, 0.3);
+        }
+
+        /* Keypad Active Input Indicator */
+        .input-focused {
+            border-color: #2563eb !important;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2) !important;
+            background-color: #eff6ff !important;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #93c5fd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased flex flex-col min-h-screen">
+
+    <!-- Header Section -->
+    <header class="bg-gradient-to-r from-slate-900 via-blue-900 to-sky-900 text-white shadow-xl sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-5 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-4">
+                <div class="p-3 bg-white/10 rounded-2xl backdrop-blur-md border border-white/20 text-blue-300">
+                    <i class="fa-solid fa-calculator text-3xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">العمليات الأساسية في مجموعة الأعداد الحقيقية</h1>
+                    <p class="text-sm text-blue-200/90 font-medium mt-0.5">إعداد: عائض الحربي</p>
+                </div>
+            </div>
+            
+            <!-- Badge -->
+            <div class="bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/15 text-xs sm:text-sm flex items-center gap-3">
+                <span class="inline-block w-2.5 h-2.5 rounded-full bg-blue-400 animate-pulse"></span>
+                <span class="font-bold">المجموعة:</span>
+                <span class="ltr-math text-amber-300 font-bold">ℤ (Integer Numbers)</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+
+        <!-- Navigation Tabs (3 Main Tabs) -->
+        <div class="flex flex-wrap gap-3 mb-8 bg-white p-2 rounded-2xl shadow-sm border border-slate-200">
+            <!-- Icon 1: Solved Examples -->
+            <button onclick="switchTab('demo')" id="tab-demo" class="tab-btn active flex-1 min-w-[200px] py-3.5 px-5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 bg-blue-600 text-white shadow-md">
+                <i class="fa-solid fa-chalkboard-user text-lg"></i>
+                <span>أمثلة مشروحة بالخطوات</span>
+            </button>
+
+            <!-- Icon 2: Interactive Calculator -->
+            <button onclick="switchTab('calc')" id="tab-calc" class="tab-btn flex-1 min-w-[200px] py-3.5 px-5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 text-slate-600 hover:bg-slate-100">
+                <i class="fa-solid fa-calculator text-lg"></i>
+                <span>الحاسبة التفاعلية</span>
+            </button>
+
+            <!-- Icon 3: Practice Generator -->
+            <button onclick="switchTab('generator')" id="tab-generator" class="tab-btn flex-1 min-w-[200px] py-3.5 px-5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 text-slate-600 hover:bg-slate-100">
+                <i class="fa-solid fa-wand-magic-sparkles text-lg"></i>
+                <span>مولد التمارين والاختبار</span>
+            </button>
+        </div>
+
+        <!-- ================= TAB 1: INTERACTIVE SOLVED EXAMPLES ================= -->
+        <div id="content-demo" class="tab-content block space-y-6">
+            
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-6 border-b border-slate-100 pb-4">
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-lightbulb text-amber-500"></i>
+                            <span>استعراض حالات الجمع والطرح والعمليات في الأعداد الصحيحة ℤ</span>
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-1">اختر إحدى الحالات المخصصة أدناه لفهم قواعد الإشارات للجمع والطرح (متفقي ومختلفي الإشارة) والضرب والقسمة خطوة بخطوة</p>
+                    </div>
+                </div>
+
+                <!-- Case Selection Buttons (8 Detailed Cases) -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                    <!-- Case 1: Add Same Positive -->
+                    <button onclick="loadDemoPreset('add-same-pos')" id="demo-btn-add-same-pos" class="demo-preset-btn p-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-500 text-blue-900 rounded-xl text-xs font-bold transition text-right">
+                        <div class="flex items-center justify-between mb-1">
+                            <span>1. جمع متفقي الإشارة (موجبان)</span>
+                            <i class="fa-solid fa-plus text-blue-600"></i>
+                        </div>
+                        <span class="ltr-math text-[11px] text-blue-700 block">8 + 6 = 14</span>
+                    </button>
+
+                    <!-- Case 2: Add Same Negative -->
+                    <button onclick="loadDemoPreset('add-same-neg')" id="demo-btn-add-same-neg" class="demo-preset-btn p-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-xl text-xs font-bold transition text-right">
+                        <div class="flex items-center justify-between mb-1">
+                            <span>2. جمع متفقي الإشارة (سالبان)</span>
+                            <i class="fa-solid fa-minus text-blue-600"></i>
+                        </div>
+                        <span class="ltr-math text-[11px] text-slate-500 block">(-7) + (-5) = -12</span>
+                    </button>
+
+                    <!-- Case 3: Add Diff Pos Larger -->
+                    <button onclick="loadDemoPreset('add-diff-pos')" id="demo-btn-add-diff-pos" class="demo-preset-btn p-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-xl text-xs font-bold transition text-right">
+                        <div class="flex items-center justify-between mb-1">
+                            <span>3. جمع مختلفي الإشارة (الموجب أكبر)</span>
+                            <i class="fa-solid fa-plus-minus text-blue-600"></i>
+                        </div>
+                        <span class="ltr-math text-[11px] text-slate-500 block">(-4) + 11 = 7</span>
+                    </button>
+
+                    <!-- Case 4: Add Diff Neg Larger -->
+                    <button onclick="loadDemoPreset('add-diff-neg')" id="demo-btn-add-diff-neg" class="demo-preset-btn p-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-xl text-xs font-bold transition text-right">
+                        <div class="flex items-center justify-between mb-1">
+                            <span>4. جمع مختلفي الإشارة (السالب أكبر)</span>
+                            <i class="fa-solid fa-plus-minus text-blue-600"></i>
+                        </div>
+                        <span class="ltr-math text-[11px] text-slate-500 block">(-13) + 6 = -7</span>
+                    </button>
+
+                    <!-- Case 5: Subtraction Inverse -->
+                    <button onclick="loadDemoPreset('sub-pos')" id="demo-btn-sub-pos" class="demo-preset-btn p-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-xl text-xs font-bold transition text-right">
+                        <div class="flex items-center justify-between mb-1">
+                            <span>5. طرح موجب أكبر (جمع المعكوس)</span>
+                            <i class="fa-solid fa-minus text-blue-600"></i>
+                        </div>
+                        <span class="ltr-math text-[11px] text-slate-500 block">5 - 12 = -7</span>
+                    </button>
+
+                    <!-- Case 6: Subtract Negative -->
+                    <button onclick="loadDemoPreset('sub-neg')" id="demo-btn-sub-neg" class="demo-preset-btn p-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-xl text-xs font-bold transition text-right">
+                        <div class="flex items-center justify-between mb-1">
+                            <span>6. طرح عدد سالب (- - يتحول +)</span>
+                            <i class="fa-solid fa-equals text-blue-600"></i>
+                        </div>
+                        <span class="ltr-math text-[11px] text-slate-500 block">(-6) - (-10) = 4</span>
+                    </button>
+
+                    <!-- Case 7: Integer Multiplication -->
+                    <button onclick="loadDemoPreset('mul-int')" id="demo-btn-mul-int" class="demo-preset-btn p-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-xl text-xs font-bold transition text-right">
+                        <div class="flex items-center justify-between mb-1">
+                            <span>7. ضرب الأعداد الصحيحة</span>
+                            <i class="fa-solid fa-xmark text-blue-600"></i>
+                        </div>
+                        <span class="ltr-math text-[11px] text-slate-500 block">(-5) × (-8) = 40</span>
+                    </button>
+
+                    <!-- Case 8: Division & Zero -->
+                    <button onclick="loadDemoPreset('div-int')" id="demo-btn-div-int" class="demo-preset-btn p-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-xl text-xs font-bold transition text-right">
+                        <div class="flex items-center justify-between mb-1">
+                            <span>8. قسمة الأعداد الصحيحة</span>
+                            <i class="fa-solid fa-divide text-blue-600"></i>
+                        </div>
+                        <span class="ltr-math text-[11px] text-slate-500 block">(-24) ÷ 6 = -4</span>
+                    </button>
+                </div>
+
+                <!-- Display Box for Demo Preset -->
+                <div id="demo-display-area" class="space-y-6">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ================= TAB 2: INTERACTIVE CALCULATOR ================= -->
+        <div id="content-calc" class="tab-content hidden space-y-6">
+            
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-6">
+                <div class="border-b border-slate-100 pb-4">
+                    <h3 class="font-bold text-slate-800 text-lg flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-blue-600"></i>
+                        <span>حاسبة الأعداد الحقيقية مع لوحة أرقام تفاعلية</span>
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-1">اضغط على أي خانة ثم استخدم لوحة الأرقام بالأسفل للإدخال بسرعة وسهولة</p>
+                </div>
+
+                <!-- Input Controls & On-Screen Keypad Layout -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                    
+                    <!-- Inputs Column -->
+                    <div class="lg:col-span-7 space-y-4 bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
+                            <!-- Number 1 Input -->
+                            <div class="space-y-1">
+                                <label class="block text-xs font-bold text-slate-600">العدد الأول (a)</label>
+                                <input type="text" id="calc-num-a" value="-12" readonly onclick="setActiveInput('calc-num-a')" onfocus="setActiveInput('calc-num-a')"
+                                    class="calc-input w-full bg-white border-2 border-blue-400 input-focused rounded-xl p-3 text-center font-mono font-bold text-xl text-slate-800 cursor-pointer transition ltr-math">
+                            </div>
+
+                            <!-- Operation Select -->
+                            <div class="space-y-1">
+                                <label class="block text-xs font-bold text-slate-600 text-center">العملية</label>
+                                <select id="calc-op" onchange="runCalculatorOperation()" 
+                                    class="w-full bg-blue-600 text-white font-bold text-lg p-3 rounded-xl border-none focus:ring-2 focus:ring-blue-400 text-center cursor-pointer shadow-md transition">
+                                    <option value="+">جمع (+)</option>
+                                    <option value="-">طرح (-)</option>
+                                    <option value="*">ضرب (×)</option>
+                                    <option value="/">قسمة (÷)</option>
+                                </select>
+                            </div>
+
+                            <!-- Number 2 Input -->
+                            <div class="space-y-1">
+                                <label class="block text-xs font-bold text-slate-600">العدد الثاني (b)</label>
+                                <input type="text" id="calc-num-b" value="5" readonly onclick="setActiveInput('calc-num-b')" onfocus="setActiveInput('calc-num-b')"
+                                    class="calc-input w-full bg-white border-2 border-slate-300 rounded-xl p-3 text-center font-mono font-bold text-xl text-slate-800 cursor-pointer transition ltr-math">
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap gap-2 pt-2">
+                            <button onclick="fillCalcRandomValues()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 px-4 py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-dice text-blue-600"></i>
+                                <span>أرقام عشوائية</span>
+                            </button>
+                            <button onclick="clearActiveInput()" class="bg-rose-100 hover:bg-rose-200 text-rose-800 px-4 py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1">
+                                <i class="fa-solid fa-trash-can"></i>
+                                <span>مسح الخانة</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- On-Screen Keypad Column -->
+                    <div class="lg:col-span-5 bg-blue-900 text-white p-4 rounded-2xl shadow-lg space-y-3">
+                        <div class="flex justify-between items-center px-1">
+                            <span class="text-xs font-bold text-blue-200 flex items-center gap-1.5">
+                                <i class="fa-solid fa-calculator text-blue-300"></i>
+                                <span>لوحة الأرقام التفاعلية</span>
+                            </span>
+                            <span id="keypad-target-label" class="text-[11px] bg-blue-800 text-blue-200 px-2 py-0.5 rounded-full font-bold">الخانة: العدد الأول</span>
+                        </div>
+
+                        <!-- Keypad Buttons Grid -->
+                        <div class="grid grid-cols-3 gap-2 ltr-math">
+                            <button onclick="pressKeypad('7')" class="bg-blue-800/80 hover:bg-blue-700 active:scale-95 py-3 rounded-xl font-bold text-xl transition text-white shadow">7</button>
+                            <button onclick="pressKeypad('8')" class="bg-blue-800/80 hover:bg-blue-700 active:scale-95 py-3 rounded-xl font-bold text-xl transition text-white shadow">8</button>
+                            <button onclick="pressKeypad('9')" class="bg-blue-800/80 hover:bg-blue-700 active:scale-95 py-3 rounded-xl font-bold text-xl transition text-white shadow">9</button>
+
+                            <button onclick="pressKeypad('4')" class="bg-blue-800/80 hover:bg-blue-700 active:scale-95 py-3 rounded-xl font-bold text-xl transition text-white shadow">4</button>
+                            <button onclick="pressKeypad('5')" class="bg-blue-800/80 hover:bg-blue-700 active:scale-95 py-3 rounded-xl font-bold text-xl transition text-white shadow">5</button>
+                            <button onclick="pressKeypad('6')" class="bg-blue-800/80 hover:bg-blue-700 active:scale-95 py-3 rounded-xl font-bold text-xl transition text-white shadow">6</button>
+
+                            <button onclick="pressKeypad('1')" class="bg-blue-800/80 hover:bg-blue-700 active:scale-95 py-3 rounded-xl font-bold text-xl transition text-white shadow">1</button>
+                            <button onclick="pressKeypad('2')" class="bg-blue-800/80 hover:bg-blue-700 active:scale-95 py-3 rounded-xl font-bold text-xl transition text-white shadow">2</button>
+                            <button onclick="pressKeypad('3')" class="bg-blue-800/80 hover:bg-blue-700 active:scale-95 py-3 rounded-xl font-bold text-xl transition text-white shadow">3</button>
+
+                            <button onclick="toggleSignKeypad()" class="bg-amber-500 hover:bg-amber-600 active:scale-95 py-3 rounded-xl font-bold text-lg transition text-slate-900 shadow flex items-center justify-center font-sans">± سالب/موجب</button>
+                            <button onclick="pressKeypad('0')" class="bg-blue-800/80 hover:bg-blue-700 active:scale-95 py-3 rounded-xl font-bold text-xl transition text-white shadow">0</button>
+                            <button onclick="pressKeypad('.')" class="bg-blue-800/80 hover:bg-blue-700 active:scale-95 py-3 rounded-xl font-bold text-xl transition text-white shadow">.</button>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 pt-1">
+                            <button onclick="backspaceKeypad()" class="bg-slate-700 hover:bg-slate-600 active:scale-95 py-2.5 rounded-xl font-bold text-xs transition text-white shadow flex items-center justify-center gap-1 font-sans">
+                                <i class="fa-solid fa-backspace"></i>
+                                <span>تراجع</span>
+                            </button>
+                            <button onclick="clearActiveInput()" class="bg-rose-600 hover:bg-rose-700 active:scale-95 py-2.5 rounded-xl font-bold text-xs transition text-white shadow flex items-center justify-center gap-1 font-sans">
+                                <i class="fa-solid fa-xmark"></i>
+                                <span>مسح</span>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Calculator Result Card -->
+                <div id="calc-result-section" class="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-4">
+                        <div>
+                            <h4 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-list-check text-blue-600"></i>
+                                <span>خطوات الحساب والشرح التفصيلي</span>
+                            </h4>
+                        </div>
+                        <div class="flex items-center gap-2 bg-white p-1 rounded-xl border border-slate-200">
+                            <button onclick="calcPrevStep()" class="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-800 rounded-lg font-bold text-xs transition">
+                                <i class="fa-solid fa-chevron-right ml-1"></i> السابق
+                            </button>
+                            <span id="calc-step-counter" class="text-xs font-bold text-slate-700 px-3 ltr-math">Step 1 / 1</span>
+                            <button onclick="calcNextStep()" class="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-800 rounded-lg font-bold text-xs transition">
+                                التالي <i class="fa-solid fa-chevron-left mr-1"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step View -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                        <div class="lg:col-span-8 bg-white p-5 rounded-2xl border border-slate-200 space-y-3 font-mono ltr-math">
+                            <div id="calc-step-title" class="text-xs font-bold font-sans text-blue-800 bg-blue-100 inline-block px-3 py-1 rounded-full">
+                                القاعدة المطبقة
+                            </div>
+                            <div id="calc-step-expr" class="text-slate-800 font-extrabold text-base sm:text-lg">
+                                <!-- Step Expression -->
+                            </div>
+                            <div id="calc-step-res" class="text-blue-700 font-bold text-lg pt-2 border-t border-slate-100">
+                                <!-- Step Result -->
+                            </div>
+                        </div>
+
+                        <!-- Final Result Box -->
+                        <div class="lg:col-span-4 bg-blue-600 text-white p-5 rounded-2xl text-center space-y-2 shadow-lg">
+                            <span class="text-xs font-bold text-blue-200 block uppercase">النتيجة النهائية (Final Output)</span>
+                            <div id="calc-final-val" class="text-2xl sm:text-3xl font-extrabold ltr-math">
+                                <!-- Output -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ================= TAB 3: PRACTICE GENERATOR & QUIZ ================= -->
+        <div id="content-generator" class="tab-content hidden space-y-6">
+            
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-6">
+                
+                <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 border-b border-slate-100 pb-4">
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-wand-magic-sparkles text-sky-600"></i>
+                            <span>مولد التمارين واختبار الأعداد الحقيقية</span>
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-1">احسب ناتج العملية واستخدم لوحة الأرقام لإدخال الإجابة بسرعة!</p>
+                    </div>
+
+                    <!-- Score & Control Bar -->
+                    <div class="flex items-center gap-3">
+                        <div class="bg-blue-50 border border-blue-200 px-4 py-2 rounded-xl text-blue-900 font-bold text-xs sm:text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-trophy text-amber-500"></i>
+                            <span>النقاط: <strong id="gen-score" class="text-blue-700 font-extrabold text-base">0</strong></span>
+                        </div>
+                        <button onclick="generateNewExercise()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 shadow-sm">
+                            <i class="fa-solid fa-rotate-right"></i>
+                            <span>سؤال جديد</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Generated Exercise Area -->
+                <div id="gen-exercise-card" class="space-y-6">
+                    <!-- Populated dynamically via JS -->
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 py-6 text-center text-xs border-t border-slate-800 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <p>العمليات الأساسية في مجموعة الأعداد الحقيقية - الرياضيات</p>
+            <p class="text-blue-400 font-bold">إعداد: عائض الحربي © 2026</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Global Application State
+        let currentTab = 'demo';
+        let activeInputId = 'calc-num-a'; // Active Input Tracker for Keypad
+
+        // Tab 1 (Demo) State
+        let demoSteps = [];
+        let currentDemoStepIndex = 0;
+
+        // Tab 2 (Calculator) State
+        let calcSteps = [];
+        let calcStepIndex = 0;
+
+        // Tab 3 (Generator) State
+        let currentGenProblem = null;
+        let genScore = 0;
+
+        // Keypad Active Input Switcher
+        function setActiveInput(inputId) {
+            activeInputId = inputId;
+
+            // Highlight border for active input
+            document.querySelectorAll('.calc-input').forEach(el => el.classList.remove('input-focused', 'border-blue-400'));
+            const currentEl = document.getElementById(inputId);
+            if (currentEl) {
+                currentEl.classList.add('input-focused', 'border-blue-400');
+            }
+
+            // Update Keypad label
+            const labelEl = document.getElementById('keypad-target-label');
+            if (labelEl) {
+                if (inputId === 'calc-num-a') labelEl.innerText = "الخانة: العدد الأول (a)";
+                else if (inputId === 'calc-num-b') labelEl.innerText = "الخانة: العدد الثاني (b)";
+                else if (inputId === 'gen-user-input') labelEl.innerText = "الخانة: إجابة السؤال";
+            }
+        }
+
+        function pressKeypad(char) {
+            const inputEl = document.getElementById(activeInputId);
+            if (!inputEl) return;
+
+            // Restrict decimals for pure integer inputs
+            if (char === '.') return;
+
+            let val = inputEl.value;
+            if (val === '0') {
+                val = char;
+            } else {
+                val += char;
+            }
+            inputEl.value = val;
+
+            if (activeInputId.startsWith('calc-num')) {
+                runCalculatorOperation();
+            }
+        }
+
+        function toggleSignKeypad() {
+            const inputEl = document.getElementById(activeInputId);
+            if (!inputEl) return;
+
+            let val = inputEl.value.trim();
+            if (val === '' || val === '0') {
+                val = '-';
+            } else if (val.startsWith('-')) {
+                val = val.substring(1);
+            } else {
+                val = '-' + val;
+            }
+            inputEl.value = val;
+
+            if (activeInputId.startsWith('calc-num')) {
+                runCalculatorOperation();
+            }
+        }
+
+        function backspaceKeypad() {
+            const inputEl = document.getElementById(activeInputId);
+            if (!inputEl) return;
+
+            let val = inputEl.value;
+            val = val.slice(0, -1);
+            inputEl.value = val;
+
+            if (activeInputId.startsWith('calc-num')) {
+                runCalculatorOperation();
+            }
+        }
+
+        function clearActiveInput() {
+            const inputEl = document.getElementById(activeInputId);
+            if (!inputEl) return;
+
+            inputEl.value = '';
+            if (activeInputId.startsWith('calc-num')) {
+                runCalculatorOperation();
+            }
+        }
+
+        // Tab Switching Logic
+        function switchTab(tabId) {
+            currentTab = tabId;
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-600', 'text-white', 'shadow-md', 'active');
+                btn.classList.add('text-slate-600', 'hover:bg-slate-100');
+            });
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
+
+            const selectedBtn = document.getElementById(`tab-${tabId}`);
+            if (selectedBtn) {
+                selectedBtn.classList.add('bg-blue-600', 'text-white', 'shadow-md', 'active');
+                selectedBtn.classList.remove('text-slate-600', 'hover:bg-slate-100');
+            }
+
+            const targetContent = document.getElementById(`content-${tabId}`);
+            if (targetContent) targetContent.classList.remove('hidden');
+
+            if (tabId === 'demo') {
+                loadDemoPreset('add-same-pos');
+            } else if (tabId === 'calc') {
+                setActiveInput('calc-num-a');
+                runCalculatorOperation();
+            } else if (tabId === 'generator') {
+                if (!currentGenProblem) generateNewExercise();
+            }
+        }
+
+        function loadDemoPreset(presetKey) {
+            document.querySelectorAll('.demo-preset-btn').forEach(b => {
+                b.classList.remove('bg-blue-50', 'border-2', 'border-blue-500', 'text-blue-900');
+                b.classList.add('bg-slate-50', 'border', 'border-slate-200', 'text-slate-700');
+            });
+
+            const selBtn = document.getElementById(`demo-btn-${presetKey}`);
+            if (selBtn) {
+                selBtn.classList.remove('bg-slate-50', 'border', 'border-slate-200', 'text-slate-700');
+                selBtn.classList.add('bg-blue-50', 'border-2', 'border-blue-500', 'text-blue-900');
+            }
+
+            let preset = {};
+
+            if (presetKey === 'add-same-pos') {
+                preset = {
+                    title: "1. جمع أعداد متفقة في الإشارة (موجبان): 8 + 6",
+                    isDefined: true,
+                    numA: 8,
+                    numB: 6,
+                    op: "+",
+                    result: 14,
+                    explanation: "قاعدة متفقي الإشارة: إذا كانت إشارتا العددين متشابهتين (موجبان)، نجمع قيم العددين مباشرة ونحتفظ بالإشارة الموجبة (+).",
+                    steps: [
+                        { title: "الخطوة 1: فحص نوع الإشارتين", expr: "العدد 8 موجب (+) والعدد 6 موجب (+)", res: "العددان متفقان في الإشارة (موجبان)" },
+                        { title: "الخطوة 2: جمع قيم الأعداد", expr: "8 + 6 = 14", res: "الناتج = +14" }
+                    ]
+                };
+            } else if (presetKey === 'add-same-neg') {
+                preset = {
+                    title: "2. جمع أعداد متفقة في الإشارة (سالبان): (-7) + (-5)",
+                    isDefined: true,
+                    numA: -7,
+                    numB: -5,
+                    op: "+",
+                    result: -12,
+                    explanation: "قاعدة متفقي الإشارة: إذا كانت إشارتا العددين متشابهتين (سالبان)، نجمع قيم الأعداد ونضع إشارة السالب (-).",
+                    steps: [
+                        { title: "الخطوة 1: فحص نوع الإشارتين", expr: "الأول (-7) سالب والثاني (-5) سالب", res: "العددان متفقان في الإشارة (سالبان)" },
+                        { title: "الخطوة 2: جمع قيم الأرقام بدون إشارة", expr: "7 + 5 = 12", res: "مجموع القيم يساوي 12" },
+                        { title: "الخطوة 3: تطبيق الإشارة المشتركة", expr: "بما أن الإشارتين سالبتان، نضع الإشارة السالبة للناتج", res: "الناتج = -12" }
+                    ]
+                };
+            } else if (presetKey === 'add-diff-pos') {
+                preset = {
+                    title: "3. جمع أعداد مختلفة في الإشارة (الموجب أكبر): (-4) + 11",
+                    isDefined: true,
+                    numA: -4,
+                    numB: 11,
+                    op: "+",
+                    result: 7,
+                    explanation: "قاعدة مختلفي الإشارة: نطرح الرقم الأصغر من الأكبر، ونضع إشارة العدد الأكبر في القيمة المطلقة (11 أكبر من 4 فالإشارة موجبة).",
+                    steps: [
+                        { title: "الخطوة 1: فحص نوع الإشارتين", expr: "الأول (-4) سالب والثاني (11) موجب", res: "العددان مختلفان في الإشارة" },
+                        { title: "الخطوة 2: طرح الرقمين", expr: "11 - 4 = 7", res: "فرق القيمتين يساوي 7" },
+                        { title: "الخطوة 3: تحديد إشارة العدد الأكبر", expr: "العدد الأكبر هو 11 وإشارته موجبة (+)", res: "الناتج = +7" }
+                    ]
+                };
+            } else if (presetKey === 'add-diff-neg') {
+                preset = {
+                    title: "4. جمع أعداد مختلفة في الإشارة (السالب أكبر): (-13) + 6",
+                    isDefined: true,
+                    numA: -13,
+                    numB: 6,
+                    op: "+",
+                    result: -7,
+                    explanation: "قاعدة مختلفي الإشارة: نطرح القيمتين (13 - 6 = 7) ونضع إشارة العدد الأكبر (13 إشارته سالبة).",
+                    steps: [
+                        { title: "الخطوة 1: فحص نوع الإشارتين", expr: "الأول (-13) سالب والثاني (6) موجب", res: "العددان مختلفان في الإشارة" },
+                        { title: "الخطوة 2: طرح الرقمين", expr: "13 - 6 = 7", res: "فرق القيمتين يساوي 7" },
+                        { title: "الخطوة 3: تحديد إشارة العدد الأكبر", expr: "العدد الأكبر مطلقاً هو 13 وإشارته سالبة (-)", res: "الناتج = -7" }
+                    ]
+                };
+            } else if (presetKey === 'sub-pos') {
+                preset = {
+                    title: "5. طرح الأعداد (تحويل لجمع المعكوس): 5 - 12",
+                    isDefined: true,
+                    numA: 5,
+                    numB: 12,
+                    op: "-",
+                    result: -7,
+                    explanation: "قاعدة الطرح: تحويل عملية الطرح إلى جمع المعكوس: 5 - 12 تصبح 5 + (-12)، ثم نطبق قاعدة مختلفي الإشارة.",
+                    steps: [
+                        { title: "الخطوة 1: تحويل الطرح لجمع المعكوس", expr: "5 - 12  تتحول إلى  5 + (-12)", res: "جمع عددين مختلفي الإشارة" },
+                        { title: "الخطوة 2: طرح الرقمين وإعطاء إشارة الأكبر", expr: "12 - 5 = 7 ، وبما أن 12 سالب فالناتج سالب", res: "الناتج = -7" }
+                    ]
+                };
+            } else if (presetKey === 'sub-neg') {
+                preset = {
+                    title: "6. طرح عدد سالب (التقاء إشارتين سالبتين): (-6) - (-10)",
+                    isDefined: true,
+                    numA: -6,
+                    numB: -10,
+                    op: "-",
+                    result: 4,
+                    explanation: "قاعدة التقاء السوالب: (- -) تتحول مباشرة إلى موجب (+): (-6) - (-10) = (-6) + 10.",
+                    steps: [
+                        { title: "الخطوة 1: تحويل سالب السالب إلى موجب", expr: "(-6) - (-10)  تصبح  (-6) + 10", res: "التقاء الإشارتين = موجب +" },
+                        { title: "الخطوة 2: تطبيق قاعدة جمع مختلفي الإشارة", expr: "10 - 6 = 4 ، وإشارة الأكبر (10) موجبة", res: "الناتج = +4" }
+                    ]
+                };
+            } else if (presetKey === 'mul-int') {
+                preset = {
+                    title: "7. ضرب الأعداد الصحيحة: (-5) × (-8)",
+                    isDefined: true,
+                    numA: -5,
+                    numB: -8,
+                    op: "×",
+                    result: 40,
+                    explanation: "قاعدة الضرب: إشارات متشابهة تعطي ناتجاً موجباً (+)، وإشارات مختلفة تعطي ناتجاً سالباً (-).",
+                    steps: [
+                        { title: "الخطوة 1: تحديد إشارة الناتج", expr: "سالب × سالب = موجب (+)", res: "إشارات متشابهة = موجب" },
+                        { title: "الخطوة 2: ضرب القيم", expr: "5 × 8 = 40", res: "الناتج = +40" }
+                    ]
+                };
+            } else if (presetKey === 'div-int') {
+                preset = {
+                    title: "8. قسمة الأعداد الصحيحة: (-24) ÷ 6",
+                    isDefined: true,
+                    numA: -24,
+                    numB: 6,
+                    op: "÷",
+                    result: -4,
+                    explanation: "قاعدة القسمة: إشارات مختلفة تعطي ناتجاً سالباً (-). والقسمة على صفر غير معرفة دائماً.",
+                    steps: [
+                        { title: "الخطوة 1: تحديد إشارة القسمة", expr: "سالب ÷ موجب = سالب (-)", res: "إشارات مختلفة = سالب" },
+                        { title: "الخطوة 2: قسمة الأعداد", expr: "24 ÷ 6 = 4", res: "الناتج = -4" }
+                    ]
+                };
+            }
+
+            renderDemoDisplay(preset);
+        }
+
+        function renderDemoDisplay(preset) {
+            const container = document.getElementById('demo-display-area');
+
+            demoSteps = preset.steps;
+            currentDemoStepIndex = 0;
+
+            container.innerHTML = `
+                <div class="p-5 rounded-2xl ${preset.isDefined ? 'bg-blue-50/70 border-blue-200' : 'bg-rose-50 border-rose-300'} border text-slate-800 space-y-4">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-200/80 pb-3">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid ${preset.isDefined ? 'fa-circle-check text-blue-600' : 'fa-circle-xmark text-rose-600'} text-2xl"></i>
+                            <div>
+                                <h4 class="font-extrabold text-base text-slate-800">${preset.title}</h4>
+                                <span class="text-xs font-bold ${preset.isDefined ? 'bg-blue-200 text-blue-900' : 'bg-rose-200 text-rose-900'} px-2.5 py-0.5 rounded mt-1 inline-block">
+                                    ${preset.isDefined ? 'عملية معرّفة ✅' : 'عملية غير معرّفة ❌'}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Step Nav -->
+                        <div class="flex items-center gap-2 bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
+                            <button onclick="prevDemoStep()" class="px-3 py-1 bg-blue-50 hover:bg-blue-100 text-blue-800 rounded-lg font-bold text-xs transition">
+                                <i class="fa-solid fa-chevron-right ml-1"></i> السابق
+                            </button>
+                            <span id="demo-step-counter" class="text-xs font-bold text-slate-700 px-2 ltr-math">Step 1 / ${demoSteps.length}</span>
+                            <button onclick="nextDemoStep()" class="px-3 py-1 bg-blue-50 hover:bg-blue-100 text-blue-800 rounded-lg font-bold text-xs transition">
+                                التالي <i class="fa-solid fa-chevron-left mr-1"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <p class="text-xs sm:text-sm text-blue-900 font-bold bg-white p-2.5 rounded-xl border border-blue-100">${preset.explanation}</p>
+
+                    <!-- Math Display Box LTR -->
+                    <div class="flex flex-wrap items-center justify-center gap-4 bg-white p-6 rounded-xl border border-slate-200 text-xl sm:text-2xl font-mono font-bold ltr-math">
+                        <span class="p-3 rounded-xl bg-slate-100 text-slate-800" id="demo-num-a">${preset.numA < 0 ? `(${preset.numA})` : preset.numA}</span>
+                        <span class="text-blue-600 font-extrabold">${preset.op}</span>
+                        <span class="p-3 rounded-xl bg-slate-100 text-slate-800" id="demo-num-b">${preset.numB < 0 ? `(${preset.numB})` : preset.numB}</span>
+                        <span class="text-slate-400 font-extrabold">=</span>
+                        <span class="p-3 rounded-xl ${preset.isDefined ? 'bg-blue-600 text-white shadow-md' : 'bg-rose-600 text-white shadow-md'} font-extrabold">
+                            ${preset.result}
+                        </span>
+                    </div>
+
+                    <!-- Detailed Step Box -->
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 space-y-2 font-mono ltr-math">
+                        <div id="demo-step-title" class="text-xs font-bold font-sans bg-blue-600 text-white px-3 py-1 rounded-full inline-block">
+                            <!-- Step title -->
+                        </div>
+                        <div id="demo-step-expr" class="text-slate-800 font-bold text-sm sm:text-base pt-1">
+                            <!-- Expression -->
+                        </div>
+                        <div id="demo-step-result" class="text-blue-700 font-extrabold text-base sm:text-lg border-t border-slate-100 pt-1">
+                            <!-- Result -->
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            renderDemoStep();
+        }
+
+        function renderDemoStep() {
+            if (!demoSteps || demoSteps.length === 0) return;
+            const step = demoSteps[currentDemoStepIndex];
+
+            document.getElementById('demo-step-counter').innerText = `Step ${currentDemoStepIndex + 1} / ${demoSteps.length}`;
+            document.getElementById('demo-step-title').innerText = step.title;
+            document.getElementById('demo-step-expr').innerText = step.expr;
+            document.getElementById('demo-step-result').innerText = `النتيجة = ${step.res}`;
+        }
+
+        function nextDemoStep() {
+            if (currentDemoStepIndex < demoSteps.length - 1) {
+                currentDemoStepIndex++;
+                renderDemoStep();
+            }
+        }
+
+        function prevDemoStep() {
+            if (currentDemoStepIndex > 0) {
+                currentDemoStepIndex--;
+                renderDemoStep();
+            }
+        }
+
+        function runCalculatorOperation() {
+            const numAVal = document.getElementById('calc-num-a').value;
+            const numBVal = document.getElementById('calc-num-b').value;
+
+            const a = parseInt(numAVal, 10) || 0;
+            const b = parseInt(numBVal, 10) || 0;
+            const op = document.getElementById('calc-op').value;
+
+            calcSteps = [];
+            let resultVal = 0;
+            let isDefined = true;
+
+            const strA = a < 0 ? `(${a})` : `${a}`;
+            const strB = b < 0 ? `(${b})` : `${b}`;
+
+            if (op === '+') {
+                resultVal = a + b;
+                if ((a >= 0 && b >= 0) || (a < 0 && b < 0)) {
+                    calcSteps.push({
+                        title: "جمع أعداد متفقة في الإشارة (سالبان أو موجبان)",
+                        expr: `نجمع القيم المطلقة مباشرة ونضع الإشارة المشتركة`,
+                        res: `${strA} + ${strB} = ${resultVal}`
+                    });
+                } else {
+                    const absA = Math.abs(a);
+                    const absB = Math.abs(b);
+                    const largerSign = absA > absB ? (a > 0 ? '+' : '-') : (b > 0 ? '+' : '-');
+                    calcSteps.push({
+                        title: "جمع أعداد مختلفة في الإشارة",
+                        expr: `نطرح القيمة الصغرى من الكبرى ونعطي الناتج إشارة العدد الأكبر (${largerSign})`,
+                        res: `${strA} + ${strB} = ${resultVal}`
+                    });
+                }
+            } else if (op === '-') {
+                resultVal = a - b;
+                calcSteps.push({
+                    title: "تحويل الطرح إلى جمع المعكوس",
+                    expr: `${strA} - ${strB}  تتحول إلى  ${strA} + (${-b})`,
+                    res: `النتيجة = ${resultVal}`
+                });
+            } else if (op === '*') {
+                resultVal = a * b;
+                const sameSigns = (a >= 0 && b >= 0) || (a < 0 && b < 0);
+                calcSteps.push({
+                    title: "قواعد إشارات الضرب في ℤ",
+                    expr: sameSigns ? "إشارات متشابهة = الناتج موجب (+)" : "إشارات مختلفة = الناتج سالب (-)",
+                    res: `${strA} × ${strB} = ${resultVal}`
+                });
+            } else if (op === '/') {
+                if (b === 0) {
+                    isDefined = false;
+                    resultVal = "غير معرّف";
+                    calcSteps.push({
+                        title: "تنبيه: القسمة على صفر غير ممكنة",
+                        expr: "المقام يساوي 0، والقسمة على صفر مستحيلة في الأعداد الصحيحة والحقيقية",
+                        res: "الكمية غير معرّفة ❌"
+                    });
+                } else {
+                    resultVal = Math.floor(a / b);
+                    const sameSigns = (a >= 0 && b >= 0) || (a < 0 && b < 0);
+                    calcSteps.push({
+                        title: "قسمة الأعداد الصحيحة",
+                        expr: sameSigns ? "إشارات متشابهة = موجب (+)" : "إشارات مختلفة = سالب (-)",
+                        res: `${strA} ÷ ${strB} = ${resultVal}`
+                    });
+                }
+            }
+
+            calcStepIndex = 0;
+            document.getElementById('calc-final-val').innerText = isDefined ? resultVal : "غير معرّف";
+            renderCalcStep();
+        }
+
+        function renderCalcStep() {
+            if (!calcSteps || calcSteps.length === 0) return;
+            const step = calcSteps[calcStepIndex];
+
+            document.getElementById('calc-step-counter').innerText = `Step ${calcStepIndex + 1} / ${calcSteps.length}`;
+            document.getElementById('calc-step-title').innerText = step.title;
+            document.getElementById('calc-step-expr').innerText = step.expr;
+            document.getElementById('calc-step-res').innerText = step.res;
+        }
+
+        function calcNextStep() {
+            if (calcStepIndex < calcSteps.length - 1) {
+                calcStepIndex++;
+                renderCalcStep();
+            }
+        }
+
+        function calcPrevStep() {
+            if (calcStepIndex > 0) {
+                calcStepIndex--;
+                renderCalcStep();
+            }
+        }
+
+        function fillCalcRandomValues() {
+            const randomVal = () => Math.floor(Math.random() * 30) - 15;
+            document.getElementById('calc-num-a').value = randomVal();
+            document.getElementById('calc-num-b').value = randomVal();
+            runCalculatorOperation();
+        }
+
+        function generateNewExercise() {
+            // Heavily weight Addition and Subtraction to practice sign rules (80% + or -)
+            const ops = ['+', '+', '-', '-', '+', '-', '*', '/'];
+            const chosenOp = ops[Math.floor(Math.random() * ops.length)];
+            const isZeroDiv = (chosenOp === '/' && Math.random() < 0.2);
+
+            let numA, numB;
+
+            if (chosenOp === '/') {
+                if (isZeroDiv) {
+                    numA = Math.floor(Math.random() * 20) - 10;
+                    numB = 0;
+                } else {
+                    // Ensure integer clean division
+                    numB = Math.floor(Math.random() * 10) - 5;
+                    if (numB === 0) numB = 2;
+                    const mult = Math.floor(Math.random() * 12) - 6;
+                    numA = numB * mult;
+                }
+            } else {
+                numA = Math.floor(Math.random() * 30) - 15;
+                numB = Math.floor(Math.random() * 30) - 15;
+            }
+
+            let correctVal = null;
+            let isDefined = true;
+
+            if (chosenOp === '+') correctVal = numA + numB;
+            else if (chosenOp === '-') correctVal = numA - numB;
+            else if (chosenOp === '*') correctVal = numA * numB;
+            else if (chosenOp === '/') {
+                if (numB === 0) {
+                    isDefined = false;
+                    correctVal = "undefined";
+                } else {
+                    correctVal = Math.floor(numA / numB);
+                }
+            }
+
+            currentGenProblem = {
+                numA,
+                numB,
+                op: chosenOp,
+                correctVal,
+                isDefined
+            };
+
+            renderGenExerciseCard();
+        }
+
+        function renderGenExerciseCard() {
+            const card = document.getElementById('gen-exercise-card');
+            const p = currentGenProblem;
+
+            const strA = p.numA < 0 ? `(${p.numA})` : `${p.numA}`;
+            const strB = p.numB < 0 ? `(${p.numB})` : `${p.numB}`;
+            const opSymbol = p.op === '*' ? '×' : (p.op === '/' ? '÷' : p.op);
+
+            card.innerHTML = `
+                <div class="space-y-6">
+                    <!-- Exercise Box -->
+                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 text-center space-y-4">
+                        <h4 class="text-sm font-bold text-slate-700">السؤال: احسب الناتج في الأعداد الصحيحة ℤ، أو حدد إن كانت العملية غير معرّفة:</h4>
+
+                        <div class="inline-flex items-center justify-center gap-4 bg-white p-6 rounded-2xl border border-slate-300 text-2xl sm:text-3xl font-mono font-extrabold ltr-math shadow-sm">
+                            <span class="text-slate-800">${strA}</span>
+                            <span class="text-blue-600">${opSymbol}</span>
+                            <span class="text-slate-800">${strB}</span>
+                            <span class="text-slate-400">=</span>
+                            <span class="text-blue-700">؟</span>
+                        </div>
+                    </div>
+
+                    <!-- Options / User Input -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 space-y-4">
+                        <div class="flex flex-wrap items-center justify-between gap-4">
+                            <div class="flex items-center gap-4">
+                                <span class="text-xs font-bold text-slate-700">نوع العملية:</span>
+                                <label class="inline-flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700">
+                                    <input type="radio" name="gen-defined" value="defined" checked onchange="toggleGenInputState()" class="text-blue-600 focus:ring-blue-500">
+                                    <span>معرّفة (لها ناتج صحيح)</span>
+                                </label>
+                                <label class="inline-flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700">
+                                    <input type="radio" name="gen-defined" value="undefined" onchange="toggleGenInputState()" class="text-rose-600 focus:ring-rose-500">
+                                    <span>غير معرّفة (قسمة على 0)</span>
+                                </label>
+                            </div>
+
+                            <div id="gen-val-input-wrapper" class="flex items-center gap-2">
+                                <label class="text-xs font-bold text-slate-700">الناتج:</label>
+                                <input type="text" id="gen-user-input" readonly placeholder="إدخال الناتج" onclick="setActiveInput('gen-user-input')" onfocus="setActiveInput('gen-user-input')"
+                                    class="calc-input w-36 bg-slate-50 border-2 border-slate-300 rounded-xl p-2.5 font-mono font-bold text-center text-slate-800 cursor-pointer focus:outline-none transition ltr-math">
+                            </div>
+                        </div>
+
+                        <!-- Mini Keypad for Quiz -->
+                        <div class="bg-slate-900 text-white p-3 rounded-2xl space-y-2">
+                            <div class="flex justify-between items-center text-xs text-blue-200 px-1 font-bold">
+                                <span><i class="fa-solid fa-keyboard ml-1"></i>لوحة إدخال الإجابة:</span>
+                            </div>
+                            <div class="grid grid-cols-6 gap-1.5 ltr-math text-sm">
+                                <button onclick="pressKeypad('7')" class="bg-slate-800 hover:bg-slate-700 py-2 rounded-lg font-bold">7</button>
+                                <button onclick="pressKeypad('8')" class="bg-slate-800 hover:bg-slate-700 py-2 rounded-lg font-bold">8</button>
+                                <button onclick="pressKeypad('9')" class="bg-slate-800 hover:bg-slate-700 py-2 rounded-lg font-bold">9</button>
+                                <button onclick="toggleSignKeypad()" class="bg-amber-500 text-slate-900 font-sans hover:bg-amber-600 py-2 rounded-lg font-bold">±</button>
+                                <button onclick="backspaceKeypad()" class="bg-slate-700 font-sans hover:bg-slate-600 py-2 rounded-lg font-bold">⌫</button>
+                                <button onclick="clearActiveInput()" class="bg-rose-600 font-sans hover:bg-rose-700 py-2 rounded-lg font-bold">C</button>
+
+                                <button onclick="pressKeypad('4')" class="bg-slate-800 hover:bg-slate-700 py-2 rounded-lg font-bold">4</button>
+                                <button onclick="pressKeypad('5')" class="bg-slate-800 hover:bg-slate-700 py-2 rounded-lg font-bold">5</button>
+                                <button onclick="pressKeypad('6')" class="bg-slate-800 hover:bg-slate-700 py-2 rounded-lg font-bold">6</button>
+                                <button onclick="pressKeypad('1')" class="bg-slate-800 hover:bg-slate-700 py-2 rounded-lg font-bold">1</button>
+                                <button onclick="pressKeypad('2')" class="bg-slate-800 hover:bg-slate-700 py-2 rounded-lg font-bold">2</button>
+                                <button onclick="pressKeypad('3')" class="bg-slate-800 hover:bg-slate-700 py-2 rounded-lg font-bold">3</button>
+                            </div>
+                        </div>
+
+                        <div class="pt-2">
+                            <button onclick="checkGenExerciseAnswer()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-bold text-sm shadow-md transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-check"></i>
+                                <span>التحقق من الإجابة</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Feedback Box -->
+                    <div id="gen-feedback-box" class="hidden p-5 rounded-2xl border space-y-4">
+                        <!-- Populated upon check -->
+                    </div>
+                </div>
+            `;
+
+            // Set active input automatically
+            setActiveInput('gen-user-input');
+        }
+
+        function toggleGenInputState() {
+            const isDefinedChoice = document.querySelector('input[name="gen-defined"]:checked').value === 'defined';
+            const inputWrapper = document.getElementById('gen-val-input-wrapper');
+            if (isDefinedChoice) {
+                inputWrapper.classList.remove('opacity-40', 'pointer-events-none');
+            } else {
+                inputWrapper.classList.add('opacity-40', 'pointer-events-none');
+            }
+        }
+
+        function checkGenExerciseAnswer() {
+            const p = currentGenProblem;
+            const chosenDefined = document.querySelector('input[name="gen-defined"]:checked').value;
+            const feedbackBox = document.getElementById('gen-feedback-box');
+            feedbackBox.classList.remove('hidden');
+
+            const userInputEl = document.getElementById('gen-user-input');
+            const userVal = parseInt(userInputEl.value, 10);
+
+            let isCorrect = false;
+            let errorExplanation = "";
+
+            const strA = p.numA < 0 ? `(${p.numA})` : `${p.numA}`;
+            const strB = p.numB < 0 ? `(${p.numB})` : `${p.numB}`;
+            const opSymbol = p.op === '*' ? '×' : (p.op === '/' ? '÷' : p.op);
+
+            if (!p.isDefined) {
+                if (chosenDefined === 'undefined') {
+                    isCorrect = true;
+                } else {
+                    isCorrect = false;
+                    errorExplanation = `العملية <strong>${strA} ÷ 0</strong> غير معرّفة لأن القسمة على الصفر مستحيلة في مجموعة الأعداد الصحيحة والحقيقية.`;
+                }
+            } else {
+                if (chosenDefined === 'undefined') {
+                    isCorrect = false;
+                    errorExplanation = `العملية معرّفة وليست غير معرّفة! يمكنك حساب الناتج لأن المقسوم عليه لا يساوي الصفر.`;
+                } else {
+                    if (!isNaN(userVal) && userVal === p.correctVal) {
+                        isCorrect = true;
+                    } else {
+                        isCorrect = false;
+
+                        // Detailed sign explanations
+                        if (p.op === '+') {
+                            const sameSigns = (p.numA >= 0 && p.numB >= 0) || (p.numA < 0 && p.numB < 0);
+                            if (sameSigns) {
+                                errorExplanation = `العددين <strong>متفقان في الإشارة</strong>: نجمع قيم الرقمين (${Math.abs(p.numA)} + ${Math.abs(p.numB)} = ${Math.abs(p.correctVal)}) ونضع الإشارة المشتركة. الناتج الصحيح: <strong>${p.correctVal}</strong>.`;
+                            } else {
+                                errorExplanation = `العددين <strong>مختلفان في الإشارة</strong>: نطرح الصغير من الكبير (${Math.abs(p.numA)} و ${Math.abs(p.numB)}) ونضع إشارة العدد الأكبر. الناتج الصحيح: <strong>${p.correctVal}</strong>.`;
+                            }
+                        } else if (p.op === '-') {
+                            errorExplanation = `في الطرح: نحول الطرح لجمع المعكوس: <strong>${strA} + (${-p.numB})</strong> ثم نطبق قاعدة الجمع. الناتج الصحيح: <strong>${p.correctVal}</strong>.`;
+                        } else {
+                            errorExplanation = `قمت بإدخال <strong>${isNaN(userVal) ? 'لا شيء' : userVal}</strong>، بينما الناتج الصحيح هو <strong>${p.correctVal}</strong>. <br> الشرح: ${strA} ${opSymbol} ${strB} = ${p.correctVal}.`;
+                        }
+                    }
+                }
+            }
+
+            // Display Feedback with color & simplified explanations
+            if (isCorrect) {
+                genScore += 10;
+                document.getElementById('gen-score').innerText = genScore;
+
+                if (userInputEl) {
+                    userInputEl.classList.remove('border-rose-500', 'bg-rose-50');
+                    userInputEl.classList.add('border-emerald-500', 'bg-emerald-50');
+                }
+
+                feedbackBox.className = "p-5 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-900 space-y-2";
+                feedbackBox.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-circle-check text-2xl text-emerald-600"></i>
+                        <div>
+                            <h4 class="font-extrabold text-base">إجابة صحيحة بامتياز! 🎉 (+10 نقاط)</h4>
+                            <p class="text-xs text-emerald-800 mt-0.5">ممتاز! لقد طبقت قواعد إشارات الأعداد الصحيحة بالشكل الصحيح.</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                if (userInputEl) {
+                    userInputEl.classList.remove('border-emerald-500', 'bg-emerald-50');
+                    userInputEl.classList.add('border-rose-500', 'bg-rose-50');
+                }
+
+                feedbackBox.className = "p-5 rounded-2xl bg-rose-50 border border-rose-300 text-rose-900 space-y-3";
+                feedbackBox.innerHTML = `
+                    <div class="flex items-start gap-3">
+                        <i class="fa-solid fa-circle-xmark text-2xl text-rose-600 mt-0.5"></i>
+                        <div class="space-y-1.5 w-full">
+                            <h4 class="font-extrabold text-base text-rose-900">إجابة غير صحيحة!</h4>
+                            <p class="text-xs sm:text-sm font-semibold text-rose-800 bg-white p-3 rounded-xl border border-rose-200 ltr-math">
+                                ${errorExplanation}
+                            </p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // On Window Load
+        window.onload = function() {
+            loadDemoPreset('add-same-pos');
+        };
+    </script>
+</body>
+</html>
